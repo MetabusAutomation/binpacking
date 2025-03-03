@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rectangle Canvas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Rectangle Canvas</h1>
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="rectCanvas"></canvas>
+            </div>
+            <div class="sidebar">
+                <div class="global-params">
+                    <h3>Global Parameters</h3>
+                    <div class="form-group">
+                        <label for="canvasWidth">Canvas Width (inches):</label>
+                        <input type="number" id="canvasWidth" value="60" min="10" step="0.25">
+                    </div>
+                    <div class="form-group">
+                        <label for="maxSectionLength">Max Section Length (inches):</label>
+                        <input type="number" id="maxSectionLength" value="96" min="6" step="0.25">
+                    </div>
+                    <button id="applyParams">Apply Parameters</button>
+                </div>
+                <div class="bulk-input">
+                    <h3>Bulk Add Sheets</h3>
+                    <div class="form-group">
+                        <label for="namePrefix">Name Prefix:</label>
+                        <input type="text" id="namePrefix" placeholder="Cabinet">
+                    </div>
+                    <div class="form-group">
+                        <label for="bulkMeasurements">Measurements (one per line):</label>
+                        <textarea id="bulkMeasurements" placeholder="35 (3/4) x 14 (1/2) - Top 1"></textarea>
+                    </div>
+                    <button id="parseMeasurements">Parse and Add</button>
+                </div>
+                <div class="rectangle-form">
+                    <h3>Add Sheet</h3>
+                    <div class="form-group">
+                        <label for="rectName">Label:</label>
+                        <input type="text" id="rectName" placeholder="Sheet name">
+                    </div>
+                    <div class="form-group">
+                        <label for="rectWidth">Width (inches):</label>
+                        <input type="number" id="rectWidth" value="10" min="1" step="0.25">
+                    </div>
+                    <div class="form-group">
+                        <label for="rectHeight">Height (inches):</label>
+                        <input type="number" id="rectHeight" value="5" min="1" step="0.25">
+                    </div>
+                    <button id="addSheet">Add to List</button>
+                </div>
+                <div class="sheets-list">
+                    <h3>Sheet List</h3>
+                    <div id="sheetsList" class="sheets-container">
+                        <!-- Sheets will be added here dynamically -->
+                        <div class="empty-list">No sheets added yet</div>
+                    </div>
+                    <button id="placeSheets">Place All Sheets on Canvas</button>
+                    <button id="clearCanvas">Clear Everything</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

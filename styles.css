@@ -27,8 +27,13 @@ h3 {
     gap: 20px;
 }
 
-.canvas-container {
+.canvas-section {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.canvas-container {
     background-color: white;
     border: 1px solid #ddd;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -36,12 +41,23 @@ h3 {
     overflow-y: auto;
     overflow-x: auto;
     /* Enable horizontal scrolling if needed */
+    position: relative;
+    flex: 1;
 }
 
 canvas {
     display: block;
     width: 100%;
     /* Height will be set in JavaScript */
+}
+
+.canvas-controls {
+    padding: 10px;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    margin-bottom: 20px;
 }
 
 .sidebar {
@@ -219,5 +235,19 @@ textarea {
 }
 
 #parseMeasurements:hover {
+    background-color: #6a1b9a;
+}
+
+.print-button {
+    background-color: #4a148c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    width: auto;
+}
+
+.print-button:hover {
     background-color: #6a1b9a;
 }

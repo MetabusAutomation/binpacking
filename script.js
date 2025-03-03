@@ -476,6 +476,96 @@ class CanvasManager {
         this.updateSheetListUI();
         this.redraw();
     }
+
+    /**
+     * Print the canvas
+     */
+    printCanvas() {
+        // Create a new window
+        const printWindow = window.open('', '_blank');
+
+        // Create HTML content with just the canvas
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Rectangle Packing Print</title>
+                <style>
+                    @media print {
+                        body { margin: 0; }
+                        canvas { 
+                            max-width: 100%; 
+                            height: auto; 
+                            page-break-inside: avoid;
+                        }
+                    }
+                    body {
+                        display: flex;
+                        justify-content: center;
+                        align-items: flex-start;
+                        margin: 0;
+                        padding: 20px;
+                    }
+                    .print-container {
+                        display: inline-block;
+                        position: relative;
+                    }
+                    .print-info {
+                        text-align: center;
+                        font-family: Arial, sans-serif;
+                        margin-bottom: 10px;
+                    }
+                    canvas {
+                        border: 1px solid #ccc;
+                        box-shadow: 0 0 5px rgba(0,0,0,0.2);
+                    }
+                    .print-btn {
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        padding: 5px 10px;
+                        background: #4a148c;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    }
+                    @media print {
+                        .print-btn {
+                            display: none;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-container">
+                    <div class="print-info">
+                        <h2>Rectangle Packing Layout</h2>
+                        <p>Width: ${this.logicalWidth}" × Height: ${this.canvasHeight}"</p>
+                    </div>
+                    <button class="print-btn" onclick="window.print(); window.close();">Print</button>
+                </div>
+            </body>
+            </html>
+        `);
+
+        // Get the container in the new window
+        const container = printWindow.document.querySelector('.print-container');
+
+        // Create a new canvas in the print window
+        const printCanvas = document.createElement('canvas');
+        printCanvas.width = this.canvas.width;
+        printCanvas.height = this.canvas.height;
+
+        // Copy the current canvas content to the new canvas
+        const ctx = printCanvas.getContext('2d');
+        ctx.drawImage(this.canvas, 0, 0);
+
+        // Add the canvas to the print window
+        container.appendChild(printCanvas);
+
+        // Focus the print window
+        printWindow.focus();
+    }
 }
 
 // Initialize when DOM is loaded
@@ -548,6 +638,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show success message
             canvasManager.showErrorMessage(`Successfully added ${addedCount} sheets.`);
         }
+    });
+
+    // Print canvas button
+    document.getElementById('printCanvas').addEventListener('click', () => {
+        canvasManager.printCanvas();
     });
 });
 

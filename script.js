@@ -753,7 +753,7 @@ function mergeSkyline(skyline) {
 }
 
 /**
- * Packs rectangles using an enhanced Skyline algorithm with rotation support and top-down priority.
+ * Packs rectangles using a Skyline algorithm with long side vertical orientation.
  * 
  * @param {number} containerWidth - The fixed width of the container.
  * @param {number} sectionMaxHeight - The maximum height of one section.
@@ -774,46 +774,53 @@ function skylineSectionPack(containerWidth, sectionMaxHeight, rectangles) {
     // Process rectangles in order
     for (let i = 0; i < rectangles.length; i++) {
         const rect = rectangles[i];
+
+        // Determine orientation - always make longer side vertical
+        let finalWidth, finalHeight, isRotated;
+        if (rect.width > rect.height) {
+            // If width is longer, rotate to make it vertical
+            finalWidth = rect.height;
+            finalHeight = rect.width;
+            isRotated = true;
+        } else {
+            // If height is already longer or equal, keep as is
+            finalWidth = rect.width;
+            finalHeight = rect.height;
+            isRotated = false;
+        }
+
+        // Skip if width exceeds container width
+        if (finalWidth > containerWidth) {
+            console.warn(`Rectangle ${rect.name || i} is too wide to fit in container`);
+            continue;
+        }
+
         let bestCandidate = null;
         let bestCandidateIndex = -1;
         let bestScore = Infinity;
-        let bestRotation = false;
 
-        // Try both orientations for each rectangle
-        for (let rotation = 0; rotation <= 1; rotation++) {
-            const width = rotation ? rect.height : rect.width;
-            const height = rotation ? rect.width : rect.height;
+        // Find the best position for this rectangle
+        for (let j = 0; j < skyline.length; j++) {
+            const candidate = skyline[j];
+            if (candidate.width >= finalWidth) {
+                // Calculate score prioritizing higher positions (lower y values)
+                // Scale y value by 1000 to make it the dominant factor
+                const heightScore = candidate.y * 1000;
 
-            // Skip if width exceeds container width
-            if (width > containerWidth) continue;
+                // Secondary factor: minimize wasted width
+                const widthWasteScore = (candidate.width - finalWidth) * 0.1;
 
-            // Find the best position for this orientation
-            for (let j = 0; j < skyline.length; j++) {
-                const candidate = skyline[j];
-                if (candidate.width >= width) {
-                    // Calculate score prioritizing higher positions (lower y values)
-                    // Scale y value by 1000 to make it the dominant factor
-                    const heightScore = candidate.y * 1000;
+                const score = heightScore + widthWasteScore;
 
-                    // Secondary factor: minimize wasted width
-                    const widthWasteScore = (candidate.width - width) * 0.1;
+                // Would this position exceed section height?
+                if (candidate.y + finalHeight > currentSectionStart + sectionMaxHeight) {
+                    continue; // Skip this position
+                }
 
-                    // Slight preference for original orientation
-                    const rotationPenalty = rotation ? 0.5 : 0;
-
-                    const score = heightScore + widthWasteScore + rotationPenalty;
-
-                    // Would this position exceed section height?
-                    if (candidate.y + height > currentSectionStart + sectionMaxHeight) {
-                        continue; // Skip this position
-                    }
-
-                    if (score < bestScore) {
-                        bestScore = score;
-                        bestCandidate = candidate;
-                        bestCandidateIndex = j;
-                        bestRotation = rotation === 1;
-                    }
+                if (score < bestScore) {
+                    bestScore = score;
+                    bestCandidate = candidate;
+                    bestCandidateIndex = j;
                 }
             }
         }
@@ -829,30 +836,15 @@ function skylineSectionPack(containerWidth, sectionMaxHeight, rectangles) {
             currentSectionHeight = 0;
             skyline = [{ x: 0, y: currentSectionStart, width: containerWidth }];
 
-            // Try both orientations again in the new section
-            bestScore = Infinity;
+            bestCandidate = skyline[0];
+            bestCandidateIndex = 0;
 
-            for (let rotation = 0; rotation <= 1; rotation++) {
-                const width = rotation ? rect.height : rect.width;
-                const height = rotation ? rect.width : rect.height;
-
-                if (width <= containerWidth) {
-                    // Only one candidate in new section: the full width
-                    const score = rotation ? 0.5 : 0; // Slight preference for non-rotated
-
-                    if (score < bestScore) {
-                        bestScore = score;
-                        bestCandidate = skyline[0];
-                        bestCandidateIndex = 0;
-                        bestRotation = rotation === 1;
-                    }
-                }
+            // Make sure this rectangle doesn't exceed section height
+            if (finalHeight > sectionMaxHeight) {
+                console.warn(`Rectangle ${rect.name || i} height (${finalHeight}) exceeds max section height (${sectionMaxHeight})`);
+                continue; // Skip this rectangle
             }
         }
-
-        // Determine final dimensions after possible rotation
-        const finalWidth = bestRotation ? rect.height : rect.width;
-        const finalHeight = bestRotation ? rect.width : rect.height;
 
         // Place the rectangle at the chosen position
         const placement = {
@@ -861,7 +853,7 @@ function skylineSectionPack(containerWidth, sectionMaxHeight, rectangles) {
             y: bestCandidate.y,
             width: finalWidth,
             height: finalHeight,
-            rotated: bestRotation
+            rotated: isRotated
         };
         placements.push(placement);
 
